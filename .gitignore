@@ -5,3 +5,6 @@ build/*
 .vscode/extensions.json
 .vscode/launch.json
 .vscode/settings.json
+sdkconfig.esp32-s3-devkitc-1.old
+sdkconfig.esp32-s3-devkitc-1
+sdkconfig

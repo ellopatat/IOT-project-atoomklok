@@ -1,3 +1,3 @@
 #pragma once
 
-void sntp_task(void *arg);
+void sntp_run(void *arg);

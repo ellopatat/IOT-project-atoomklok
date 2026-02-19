@@ -13,6 +13,7 @@ EventGroupHandle_t s_wifi_event_group = NULL;
 
 void app_main(void)
 {
+
     vTaskDelay(pdMS_TO_TICKS(10000)); //wait for the serial monitor to be ready before printing anything
     // NVS nodig voor WiFi
     nvs_flash_init();
@@ -27,8 +28,9 @@ void app_main(void)
         ESP_LOGE(TAG, "nvs_flash_init failed (%d)", (int)err);
         return;
     }
+    wifi_init();
     
-    xTaskCreate(wifi_task, "wifi_task", 4096, NULL, 5, NULL);
     uint32_t unix_time = 0;
-    xTaskCreate(sntp_task, "sntp_task", 4096, &unix_time, 5, NULL);
+
+    xTaskCreate(wifi_task, "wifi_task", 4096, &unix_time, 5, NULL);
 }

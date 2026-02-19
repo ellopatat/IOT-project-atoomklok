@@ -12,3 +12,4 @@
 extern EventGroupHandle_t s_wifi_event_group;
 
 void wifi_task(void* arg);
+void wifi_init();

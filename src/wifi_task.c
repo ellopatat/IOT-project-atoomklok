@@ -1,4 +1,5 @@
 #include "wifi_task.h"
+#include "sntp_task.h"
 
 #include "esp_system.h"
 #include "esp_wifi.h"
@@ -42,8 +43,7 @@ static void event_handler(void* arg, esp_event_base_t event_base,
     }
 }
 
-void wifi_task(void* arg) {
-
+void wifi_init(){
     ESP_ERROR_CHECK(esp_netif_init());
     ESP_ERROR_CHECK(esp_event_loop_create_default());
     esp_netif_create_default_wifi_sta();
@@ -55,6 +55,10 @@ void wifi_task(void* arg) {
         WIFI_EVENT, ESP_EVENT_ANY_ID, &event_handler, NULL, NULL));
     ESP_ERROR_CHECK(esp_event_handler_instance_register(
         IP_EVENT, IP_EVENT_STA_GOT_IP, &event_handler, NULL, NULL));
+
+}
+void wifi_task(void* arg) {
+
 
     wifi_config_t wifi_config = {
         .sta = {
@@ -75,10 +79,10 @@ void wifi_task(void* arg) {
         portMAX_DELAY
     );
 
-    if (bits & WIFI_FAIL_BIT) {
-        ESP_LOGE(TAG, "Failed to connect after retries");
+    if (bits & WIFI_CONNECTED_BIT) {
+        sntp_run(arg);
     }
 
-    vTaskDelete(NULL); // or keep running if you want
+    vTaskDelete(NULL);
 }
 

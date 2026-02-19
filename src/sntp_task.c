@@ -100,16 +100,13 @@ static int sntp_get_unix_time(uint32_t *unix_out)
 
     //to get the correct time, we need to substract 70 years worth of seconds from the NTP time to get the Unix time.
     *unix_out = ntp_sec - NTP_TO_UNIX;
-    ESP_LOGI(TAG, "NTP seconds: %lu, Unix seconds: %lu",
-         (unsigned long)ntp_sec,
-         (unsigned long)(*unix_out));
     return 0;
 }
 
-void sntp_task(void* arg){
+void sntp_run(void* arg){
     //wait for WiFi connection
     xEventGroupWaitBits(s_wifi_event_group, WIFI_CONNECTED_BIT,pdFALSE, pdTRUE, portMAX_DELAY);
-    uint32_t *unix_time = (uint32_t *)arg;
+    uint32_t *unix_time = arg;
     while (sntp_get_unix_time(unix_time) != 0) {
         ESP_LOGW(TAG, "Failed to get time from NTP server, retrying in 5 seconds...");
         vTaskDelay(pdMS_TO_TICKS(5000));
@@ -127,5 +124,5 @@ void sntp_task(void* arg){
          timeinfo.tm_hour,
          timeinfo.tm_min,
          timeinfo.tm_sec);
-    vTaskDelete(NULL);
+
 }
