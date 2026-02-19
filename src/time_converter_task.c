@@ -32,6 +32,7 @@ void time_converter_task(void *arg)
 {
     unix_args *arg_ptrs = arg;
     xQueueReceive(arg_ptrs->unix_queue, arg_ptrs->unix_time, portMAX_DELAY);
+    resync_time(arg_ptrs->unix_time);
     while (1) {
         if(xQueueReceive(arg_ptrs->unix_queue, arg_ptrs->unix_time, 0) == pdTRUE){//if there is new unix time in the queue, resync the time.
             resync_time(arg_ptrs->unix_time);

@@ -17,12 +17,12 @@
 
 static void oled_show(ssd1306_handle_t dev, const beat_time *bt)
 {
-    char line0[32];
-    char line1[32];
+    char line0[64];
+    char line1[64];
 
 
-    snprintf(line0, sizeof(line0), "Beats: %" PRId64, bt->beats);
-    snprintf(line1, sizeof(line1), "Centibeats: %" PRId64, bt->centibeats);
+    snprintf(line0, sizeof(line0), "Beats: %03" PRId64, bt->beats);
+    snprintf(line1, sizeof(line1), "Centibeats:%05" PRId64, bt->centibeats);
 
 
     ssd1306_clear_display(dev, false);

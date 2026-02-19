@@ -9,7 +9,7 @@
 
 #define WIFI_SSID "Abcfdyh"
 #define WIFI_PASSWORD "ggfy0089"
-#define EXAMPLE_ESP_MAXIMUM_RETRY 20
+#define EXAMPLE_ESP_MAXIMUM_RETRY 9999
 
 
 static const char *TAG = "wifi_task";//to give a name to the log messages for ESP_IDF(in console)
@@ -79,12 +79,15 @@ void wifi_task(void* arg) {
         pdFALSE,
         portMAX_DELAY
     );
-
+    while(1){
     if (bits & WIFI_CONNECTED_BIT) {
         sntp_run(arg_ptrs->unix_time);
-        xQueueOverwrite(arg_ptrs->unix_queue, arg_ptrs->unix_time); 
+        xQueueOverwrite(arg_ptrs->unix_queue, arg_ptrs->unix_time);
+        vTaskDelay(pdMS_TO_TICKS(15*60*1000));//wait 15 min before resyncing time.
+        ESP_LOGI(TAG, "Resyncing time with NTP server...");
     }
+}
 
-    vTaskDelete(NULL);
+
 }
 
