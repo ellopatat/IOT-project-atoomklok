@@ -58,7 +58,8 @@ void wifi_init(){
 
 }
 void wifi_task(void* arg) {
-
+    //a struct that allows multiple arguments to be passed to the task.
+    unix_args *arg_ptrs = arg;
 
     wifi_config_t wifi_config = {
         .sta = {
@@ -80,7 +81,8 @@ void wifi_task(void* arg) {
     );
 
     if (bits & WIFI_CONNECTED_BIT) {
-        sntp_run(arg);
+        sntp_run(arg_ptrs->unix_time);
+        xQueueOverwrite(arg_ptrs->unix_queue, arg_ptrs->unix_time); 
     }
 
     vTaskDelete(NULL);

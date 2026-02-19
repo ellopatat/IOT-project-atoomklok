@@ -2,9 +2,12 @@
 #include "freertos/task.h"
 #include "esp_log.h"
 #include "nvs_flash.h"
+#include "freertos/queue.h"
 
 #include "wifi_task.h"
 #include "sntp_task.h"
+#include "time_converter_task.h"
+#include "oled_task.h"
 
 static const char *TAG = "main";
 
@@ -29,8 +32,20 @@ void app_main(void)
         return;
     }
     wifi_init();
-    
+
+    static unix_args time_args;
+
     uint32_t unix_time = 0;
 
-    xTaskCreate(wifi_task, "wifi_task", 4096, &unix_time, 5, NULL);
+    QueueHandle_t unix_queue = xQueueCreate(1, sizeof(uint32_t));
+    QueueHandle_t beat_queue = xQueueCreate(1, sizeof(beat_time));
+
+    time_args.unix_time = &unix_time;
+    time_args.unix_queue = unix_queue;
+    time_args.beat_queue = beat_queue;
+    xTaskCreate(wifi_task, "wifi_task", 4096, &time_args, 5, NULL);
+    xTaskCreate(time_converter_task, "time_converter_task", 4096, &time_args, 10, NULL);
+    xTaskCreate(oled_task, "oled_task", 4096, beat_queue, 15, NULL);
+
+
 }
