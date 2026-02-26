@@ -25,7 +25,8 @@ static void oled_show(ssd1306_handle_t dev, const beat_time *bt)
     snprintf(line1, sizeof(line1), "Centibeats:%05" PRId64, bt->centibeats);
 
 
-    ssd1306_clear_display(dev, false);
+    ssd1306_display_text(dev, 0, "                ", false);//to clear the line
+    ssd1306_display_text(dev, 2, "                ", false);
     ssd1306_set_contrast(dev, 0xff);//maximum brightness
     ssd1306_display_text(dev, 0, line0, false);
     ssd1306_display_text(dev, 2, line1, false);

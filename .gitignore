@@ -1,14 +1,6 @@
-.pio
-.vscode/.browse.c_cpp.db*
-.vscode/c_cpp_properties.json
-.vscode/launch.json
-.vscode/ipch
+.pio/*
+.vscode/*
 build/*
-sdkconfig.esp32-s3-devkitc-1.old
-sdkconfig.esp32-s3-devkitc-1
-sdkconfig
-.vscode/settings.json
-.vscode/extensions.json
-sdkconfig.esp32-s3-devkitc-1.old
+lib/*
 sdkconfig.esp32-s3-devkitc-1
 sdkconfig.esp32-s3-devkitc-1.old

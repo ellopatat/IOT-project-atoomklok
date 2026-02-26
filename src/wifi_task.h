@@ -20,4 +20,5 @@ typedef struct {
     uint32_t *unix_time;
     QueueHandle_t unix_queue;
     QueueHandle_t beat_queue;
+    QueueHandle_t oled_queue;
 } unix_args;
