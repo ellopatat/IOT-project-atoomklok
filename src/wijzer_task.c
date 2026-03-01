@@ -54,23 +54,24 @@ void stepper_task(void *arg)
     while (1) {
         xQueuePeek(q, &bt, 0);//wait for new beat_time in the queue, but don't remove it from the queue because other tasks also need it.
 
-        cb_per_step=(bt.centibeats % 100);//
-        target_step=cb_per_step*STEPS_PER_REV/100;
-        diff_steps = (target_step - current_steps + STEPS_PER_REV)% STEPS_PER_REV;
+        cb_per_step=(bt.centibeats % 100);//keep track of the current centibeat (beat)cycle.
+        target_step=cb_per_step*STEPS_PER_REV/100;//calculate the target step based on the current (beat)cycle.
+        diff_steps = (target_step - current_steps + STEPS_PER_REV)% STEPS_PER_REV;//calculate the difference between the current step and the target step.
 
-
+        //this code tells the moter to speed up when it's behind and slow down when it's ahead or on target.
         if(diff_steps>0){
-            delay_ms = 10;
+            delay_ms = 10;//move faster
         }else{
-            delay_ms = 21;
+            delay_ms = 21;//move slower
         }
         
 
-        
+        //debug
         ESP_LOGI("stepper_task", "cb_per_step: %d, target_step: %d, current_steps: %d, diff_steps: %d, delay_ms: %d", cb_per_step, target_step, current_steps, diff_steps, delay_ms);
 
+        //moves the actual moter every time the task runs, it moves only one step per (while-loop)cycle.
         if(diff_steps>0){ 
-            phase = (phase + 1) % 8;
+            phase = (phase + 1) % 8;//to keep track of the moter phase in the event
             current_steps = (current_steps + 1) % STEPS_PER_REV;
             set_step(phase);
             vTaskDelay(pdMS_TO_TICKS(delay_ms));
