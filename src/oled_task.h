@@ -5,3 +5,8 @@
 
 
 void oled_task(void *arg);
+
+typedef struct {
+    QueueHandle_t oled_queue;
+    QueueHandle_t net_queue;
+} oled_args;

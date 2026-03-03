@@ -18,7 +18,7 @@ EventGroupHandle_t s_wifi_event_group = NULL;
 void app_main(void)
 {
 
-    vTaskDelay(pdMS_TO_TICKS(10000)); //wait for the serial monitor to be ready before printing anything
+    vTaskDelay(pdMS_TO_TICKS(2000)); //wait for the serial monitor to be ready before printing anything
     // NVS nodig voor WiFi
     nvs_flash_init();
     s_wifi_event_group = xEventGroupCreate();
@@ -35,22 +35,29 @@ void app_main(void)
     wifi_init();
 
     static unix_args time_args;
+    static oled_args oled_args;
 
     uint32_t unix_time = 0;
 
     QueueHandle_t unix_queue = xQueueCreate(1, sizeof(uint32_t));
     QueueHandle_t beat_queue = xQueueCreate(1, sizeof(beat_time));
     QueueHandle_t oled_queue = xQueueCreate(1, sizeof(beat_time));
+    QueueHandle_t net_queue  = xQueueCreate(1, sizeof(network_status)); //for the lcd and led
+
 
     time_args.unix_time = &unix_time;
     time_args.unix_queue = unix_queue;
     time_args.beat_queue = beat_queue;
     time_args.oled_queue = oled_queue;
+    time_args.net_queue = net_queue;//for the lcd and led
+
+    oled_args.oled_queue = oled_queue;
+    oled_args.net_queue  = net_queue;
     xTaskCreate(wifi_task, "wifi_task", 4096, &time_args, 5, NULL);
     xTaskCreate(time_converter_task, "time_converter_task", 4096, &time_args, 10, NULL);
-    xTaskCreate(stepper_task, "stepper_task", 4096, beat_queue, 15, NULL);
-    xTaskCreate(oled_task, "oled_task", 4096, oled_queue, 5, NULL);
 
+    xTaskCreate(stepper_task, "stepper_task", 4096, beat_queue, 5, NULL);
+    xTaskCreate(oled_task, "oled_task", 4096, &oled_args, 10, NULL);
 
 
 }

@@ -21,4 +21,13 @@ typedef struct {
     QueueHandle_t unix_queue;
     QueueHandle_t beat_queue;
     QueueHandle_t oled_queue;
+
+    QueueHandle_t net_queue;
 } unix_args;
+
+typedef enum {
+    NET_VERBONDEN,
+    NET_NIET_VERBONDEN,
+    NET_NIET_BESCHIKBAAR,
+    NET_ERROR
+} network_status;

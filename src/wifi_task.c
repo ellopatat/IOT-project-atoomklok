@@ -9,7 +9,7 @@
 
 #define WIFI_SSID "Abcfdyh"
 #define WIFI_PASSWORD "ggfy0089"
-#define EXAMPLE_ESP_MAXIMUM_RETRY 9999
+#define EXAMPLE_ESP_MAXIMUM_RETRY 10
 
 
 static const char *TAG = "wifi_task";//to give a name to the log messages for ESP_IDF(in console)
@@ -20,6 +20,9 @@ static int s_retry_num = 0;
 static void event_handler(void* arg, esp_event_base_t event_base,
                                 int32_t event_id, void* event_data)
 {
+
+    unix_args *a = arg;
+    static network_status st = NET_NIET_VERBONDEN;//to keep track of the current network status, default is not connected.
 //arg</possible extra var>  
 //event_base</possible event type like WIFI_EVENT or IP_EVENT>  
 //event_id</action like WIFI_EVENT_STA_START which can overlap between event bases>
@@ -27,11 +30,16 @@ static void event_handler(void* arg, esp_event_base_t event_base,
     if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_START) {
         esp_wifi_connect();
     } else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_DISCONNECTED) {
+
         if (s_retry_num < EXAMPLE_ESP_MAXIMUM_RETRY) {
             esp_wifi_connect();
             s_retry_num++;
+            st = NET_NIET_VERBONDEN;
+            xQueueOverwrite(a->net_queue, &st);
             ESP_LOGI(TAG, "retry to connect to the AP");
         } else {
+            st = NET_NIET_BESCHIKBAAR;
+            xQueueOverwrite(a->net_queue, &st);
             xEventGroupSetBits(s_wifi_event_group, WIFI_FAIL_BIT);
         }
         ESP_LOGI(TAG,"connect to the AP fail");
@@ -39,6 +47,8 @@ static void event_handler(void* arg, esp_event_base_t event_base,
         ip_event_got_ip_t* event = (ip_event_got_ip_t*) event_data;
         ESP_LOGI(TAG, "got ip:" IPSTR, IP2STR(&event->ip_info.ip));
         s_retry_num = 0;
+        st = NET_VERBONDEN;
+        xQueueOverwrite(a->net_queue, &st);
         xEventGroupSetBits(s_wifi_event_group, WIFI_CONNECTED_BIT);
     }
 }
@@ -51,15 +61,15 @@ void wifi_init(){
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
     ESP_ERROR_CHECK(esp_wifi_init(&cfg));
 
-    ESP_ERROR_CHECK(esp_event_handler_instance_register(
-        WIFI_EVENT, ESP_EVENT_ANY_ID, &event_handler, NULL, NULL));
-    ESP_ERROR_CHECK(esp_event_handler_instance_register(
-        IP_EVENT, IP_EVENT_STA_GOT_IP, &event_handler, NULL, NULL));
-
 }
 void wifi_task(void* arg) {
     //a struct that allows multiple arguments to be passed to the task.
     unix_args *arg_ptrs = arg;
+
+    ESP_ERROR_CHECK(esp_event_handler_instance_register(
+        WIFI_EVENT, ESP_EVENT_ANY_ID, &event_handler, arg_ptrs, NULL));
+    ESP_ERROR_CHECK(esp_event_handler_instance_register(
+        IP_EVENT, IP_EVENT_STA_GOT_IP, &event_handler, arg_ptrs, NULL));
 
     wifi_config_t wifi_config = {
         .sta = {
@@ -85,9 +95,10 @@ void wifi_task(void* arg) {
         xQueueOverwrite(arg_ptrs->unix_queue, arg_ptrs->unix_time);
         vTaskDelay(pdMS_TO_TICKS(15*60*1000));//wait 15 min before resyncing time.
         ESP_LOGI(TAG, "Resyncing time with NTP server...");
+    }else{
+        vTaskDelay(pdMS_TO_TICKS(1000));//wait a bit before checking the connection status again.
     }
 }
-
 
 }
 
