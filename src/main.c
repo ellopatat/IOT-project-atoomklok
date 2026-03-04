@@ -18,7 +18,7 @@ EventGroupHandle_t s_wifi_event_group = NULL;
 void app_main(void)
 {
 
-    vTaskDelay(pdMS_TO_TICKS(2000)); //wait for the serial monitor to be ready before printing anything
+    vTaskDelay(pdMS_TO_TICKS(10000)); //wait for the serial monitor to be ready before printing anything
     // NVS nodig voor WiFi
     nvs_flash_init();
     s_wifi_event_group = xEventGroupCreate();
@@ -32,10 +32,10 @@ void app_main(void)
         ESP_LOGE(TAG, "nvs_flash_init failed (%d)", (int)err);
         return;
     }
-    wifi_init();
+    wifi_init();//init wifi after nvs flash is initialized
 
-    static unix_args time_args;
-    static oled_args oled_args;
+    static unix_args time_args;//struct to hold all time_related args 
+    static oled_args oled_args;//struct to hold all oled_related args
 
     uint32_t unix_time = 0;
 
