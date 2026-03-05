@@ -96,7 +96,7 @@ void wifi_task(void* arg) {
         vTaskDelay(pdMS_TO_TICKS(15*60*1000));//wait 15 min before resyncing time.
         ESP_LOGI(TAG, "Resyncing time with NTP server...");
     }else{
-        vTaskDelay(pdMS_TO_TICKS(1000));//make sure its not blocking
+        vTaskDelay(pdMS_TO_TICKS(1000));//wait a bit before checking the connection status again.
     }
 }
 
