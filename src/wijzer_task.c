@@ -21,6 +21,7 @@
 
 #define STEPS_PER_REV 4096
 
+//mapping the pins that need to be powered every step.
 static const uint8_t seq_halfstep[8][4] = {
     {1,0,0,0},
     {1,1,0,0},
